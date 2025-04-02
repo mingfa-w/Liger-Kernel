@@ -39,17 +39,17 @@ def bench_memory_fused_linear_simpo_loss(
     # Instantiate once and retrieve the first output only
     torch_lm_head_simpo = TorchLMHeadCPO(H=H, V=V, dtype=dtype).to(device)
     liger_lm_head_simpo = LigerLMHeadSimPO(H=H, V=V, dtype=dtype).to(device)
-    torch_lm_head_simpo = lambda x, target: torch_lm_head_simpo(x, target)[0]
-    liger_lm_head_simpo = lambda x, target: liger_lm_head_simpo(x, target)[0]
+    torch_fwd = lambda x, target: torch_lm_head_simpo(x, target)[0]
+    liger_fwd = lambda x, target: liger_lm_head_simpo(x, target)[0]
 
     _input = torch.randn(B, T, H, requires_grad=True, dtype=dtype, device=device)
     target = torch.randint(V, (B, T), dtype=torch.long, device=device)
 
     def fwd():
         if provider == "liger":
-            return liger_lm_head_simpo(_input, target)
+            return liger_fwd(_input, target)
         elif provider == "huggingface":
-            return torch_lm_head_simpo(_input, target)
+            return torch_fwd(_input, target)
 
     def full():
         y = fwd()
@@ -85,17 +85,17 @@ def bench_speed_fused_linear_simpo_loss(
     # Instantiate once and retrieve the first output only
     torch_lm_head_simpo = TorchLMHeadCPO(H=H, V=V, dtype=dtype).to(device)
     liger_lm_head_simpo = LigerLMHeadSimPO(H=H, V=V, dtype=dtype).to(device)
-    torch_lm_head_simpo = lambda x, target: torch_lm_head_simpo(x, target)[0]
-    liger_lm_head_simpo = lambda x, target: liger_lm_head_simpo(x, target)[0]
+    torch_fwd = lambda x, target: torch_lm_head_simpo(x, target)[0]
+    liger_fwd = lambda x, target: liger_lm_head_simpo(x, target)[0]
 
     _input = torch.randn(B, T, H, requires_grad=True, dtype=dtype, device=device)
     target = torch.randint(V, (B, T), dtype=torch.long, device=device)
 
     def fwd():
         if provider == "liger":
-            return liger_lm_head_simpo(_input, target)
+            return liger_fwd(_input, target)
         elif provider == "huggingface":
-            return torch_lm_head_simpo(_input, target)
+            return torch_fwd(_input, target)
 
     if mode == "forward":
         ms_50, ms_20, ms_80 = triton.testing.do_bench(
