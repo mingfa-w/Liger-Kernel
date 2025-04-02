@@ -32,12 +32,11 @@ def bench_memory_dpo_loss(input: SingleBenchmarkRunInput) -> SingleBenchmarkRunO
     ignore_index = input.extra_benchmark_config["ignore_index"]
     provider = input.kernel_provider
 
-    torch_dpo_loss = lambda x, ref_x, target: TorchLMHeadDPO(
-        H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias
-    ).to(device)(x, ref_x, target)[0]
-    liger_dpo_loss = lambda x, ref_x, target: LigerLMHeadDPO(
-        H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias
-    ).to(device)(x, ref_x, target)[0]
+    # Instantiate once and retrieve the first output only
+    torch_dpo_loss = TorchLMHeadDPO(H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias).to(device)
+    liger_dpo_loss = LigerLMHeadDPO( H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias).to(device)
+    torch_dpo_loss = lambda x, ref_x, target: torch_dpo_loss(x, ref_x, target)[0]
+    liger_dpo_loss = lambda x, ref_x, target: liger_dpo_loss(x, ref_x, target)[0]
 
     # Input shape: [B, T, H]
     _input = torch.randn(B, T, H, device=device, dtype=dtype)
@@ -83,12 +82,11 @@ def bench_speed_dpo_loss(input: SingleBenchmarkRunInput) -> SingleBenchmarkRunOu
     provider = input.kernel_provider
     mode = input.kernel_operation_mode
 
-    torch_dpo_loss = lambda x, ref_x, target: TorchLMHeadDPO(
-        H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias
-    ).to(device)(x, ref_x, target)[0]
-    liger_dpo_loss = lambda x, ref_x, target: LigerLMHeadDPO(
-        H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias
-    ).to(device)(x, ref_x, target)[0]
+    # Instantiate once and retrieve the first output only
+    torch_dpo_loss = TorchLMHeadDPO(H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias).to(device)
+    liger_dpo_loss = LigerLMHeadDPO( H=H, V=V, dtype=dtype, beta=beta, ignore_index=ignore_index, bias=bias).to(device)
+    torch_dpo_loss = lambda x, ref_x, target: torch_dpo_loss(x, ref_x, target)[0]
+    liger_dpo_loss = lambda x, ref_x, target: liger_dpo_loss(x, ref_x, target)[0]
 
     # Input shape: [B, T, H]
     _input = torch.randn(B, T, H, device=device, dtype=dtype)
